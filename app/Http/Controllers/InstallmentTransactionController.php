@@ -4,10 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\InstallmentTransaction;
+use App\Models\Note;
+use App\Models\Transaction;
 use Response;
 
 class InstallmentTransactionController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index(Request $request)
     {
         $transactionId = $request->query('note_id');
@@ -22,19 +29,31 @@ class InstallmentTransactionController extends Controller
 
     public function store(Request $request)
     {
+       
         try {
             $data = InstallmentTransaction::create([
                 'note_id' => $request->note_id,
                 'installment_number' => 1,
                 'amount' => $request->amount,
+                'created_at' => $request->date
                 // Add other relevant fields here
             ]);
+            $totalDebt = Transaction::where('id_notes', $request->note_id)->sum('total_amount');
+            $totalInstallment = InstallmentTransaction::where('note_id', $request->note_id)->sum('amount');
             
+            $note = Note::where('id', $request->note_id)->first();
+
+            // Loop through the retrieved transactions and update the 'is_pay_later' column
+            if($totalDebt == $totalInstallment){
+                $note->is_pay_later = 0;
+                $note->save();
+            }
             return Response::json([
                 'success' => true,
                 'data' => $data
             ], 200);
-
+            //calculate installment 
+            
         } catch (\Exception $err) {
             dd($err);
             return Response::json([

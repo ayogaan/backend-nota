@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\NoteController;
 use App\Http\Controllers\GoodsController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\InstallmentTransactionController;
@@ -31,6 +33,13 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('register', 'register');
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');
+
+});
+
+Route::controller(UserController::class)->group(function () {
+    Route::get('/users', 'index');
+    Route::get('/users/{id}', 'show');
+    Route::delete('/users/{id}', 'destroy');
 
 });
 
@@ -64,7 +73,7 @@ Route::controller(GoodsController::class)->group(function () {
 Route::controller(TransactionController::class)->group(function () {
     Route::get('/transaction/', 'index');
     Route::get('/transaction/{id}', 'show'); 
-    Route::post('/transaction', 'store');
+    Route::post('/transaction/', 'store');
     Route::put('/transaction/{id}', 'update');
     Route::delete('/transaction/{id}', 'destroy');
 });

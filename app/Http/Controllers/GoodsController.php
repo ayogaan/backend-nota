@@ -8,13 +8,18 @@ use Response;
 
 class GoodsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index(Request $request)
     {
         if($request->query('page')==="all"){
-            $data =  ['data'=>Good::select('name', 'id', 'id_supplier')->where('id_supplier', $request->query('supplier'))->get()];
+            $data =  ['data'=>Good::select('name', 'id', 'id_supplier', 'price')->where('id_supplier', $request->query('supplier'))->get()];
             return response()->json($data);
         }
-        return Good::paginate(5);
+        return Good::with('supplier')->paginate(5);
     }
 
     public function store(Request $request)
@@ -91,6 +96,7 @@ class GoodsController extends Controller
         } catch (\Exception $err) {
             return Response::json([
                 'success' => false,
+                'err' => $err->getMessage()
             ], 400);
         }
     }

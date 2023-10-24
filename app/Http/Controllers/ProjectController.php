@@ -7,6 +7,11 @@ use App\Models\Project;
 use Response;
 class ProjectController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+    
     public function index(Request $request){
         if($request->query("page")=="all"){
             $data =  ['data'=>Project::select('name', 'id')->where('status', 'ongoing')->get()];

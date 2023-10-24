@@ -23,9 +23,10 @@ return new class extends Migration
             $table->timestamps();
 
             // Add foreign key constraints if required
-            $table->foreign('id_good')->references('id')->on('goods');
-            $table->foreign('id_notes')->references('id')->on('notes');
-            $table->foreign('id_project')->references('id')->on('projects');
+            $table->foreign('id_good')->references('id')->on('goods')->onDelete('cascade');
+            $table->foreign('id_notes')->references('id')->on('notes')->onDelete('cascade');
+            $table->foreign('id_project')->references('id')->on('projects')->onDelete('cascade');
+            
 
         });
     }

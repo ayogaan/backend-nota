@@ -3,9 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\Note;
+use Response;
 class NoteController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index(Request $request){
         if($request->query("page")=="all"){
             $data =  ['data'=>Note::all()];
@@ -60,7 +66,7 @@ class NoteController extends Controller
 
     public function destroy($id){
         try{
-            $note = Note::find($id)->delete();
+            $note = Note::where('id', $id)->delete();
             return Response::json([
                 'success' => true,
                 'message' => 'data deleted'
