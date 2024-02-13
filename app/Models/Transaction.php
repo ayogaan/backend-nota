@@ -14,7 +14,8 @@ class Transaction extends Model
         'id_project',
         'quantity',
         'total_amount',
-        'created_at'
+        'created_at',
+        'total_cuts'
         // Add other fields as needed
     ];
 }

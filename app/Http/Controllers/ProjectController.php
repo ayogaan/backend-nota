@@ -17,7 +17,7 @@ class ProjectController extends Controller
             $data =  ['data'=>Project::select('name', 'id')->where('status', 'ongoing')->get()];
             return response()->json($data);
         }
-        return Project::paginate(5);
+        return Project::where('name', 'like', '%'.$request->query('name').'%')->paginate(5);
     }
 
     public function store(Request $request){

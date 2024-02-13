@@ -11,17 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('goods', function (Blueprint $table) {
+        Schema::create('expenses', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('id_supplier');
-            $table->string('name');
-            $table->text('description');
-            $table->string('price');
+            $table->string('amount');
+            $table->text('note');
+            $table->enum('type', ['debit', 'kredit']);
             $table->timestamps();
-            $table->foreign('id_supplier')
-                ->references('id')
-                ->on('suppliers')
-                ->onDelete('cascade');
         });
     }
 
@@ -30,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('goods');
+        Schema::dropIfExists('expenses');
     }
 };

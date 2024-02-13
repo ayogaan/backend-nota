@@ -19,6 +19,8 @@ return new class extends Migration
             
             $table->integer('quantity');
             $table->decimal('total_amount', 10, 2);
+            $table->decimal('total_cuts', 10, 2)->nullable();
+
             // Add other fields as needed
             $table->timestamps();
 

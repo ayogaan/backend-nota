@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Good;
+use App\Models\GoodLog;
+use DB;
 use Response;
 
 class GoodsController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('permission:create goods');
     }
 
     public function index(Request $request)
@@ -19,7 +21,7 @@ class GoodsController extends Controller
             $data =  ['data'=>Good::select('name', 'id', 'id_supplier', 'price')->where('id_supplier', $request->query('supplier'))->get()];
             return response()->json($data);
         }
-        return Good::with('supplier')->paginate(5);
+        return Good::where('name', 'like', '%'.$request->query('name').'%')->with('supplier')->paginate(5);
     }
 
     public function store(Request $request)
@@ -32,6 +34,11 @@ class GoodsController extends Controller
                 'id_supplier' => $request->id_supplier,
 
                 // Add other fields as needed
+            ]);
+
+            GoodLog::create([
+                'good_id' => $data->id,
+                'price' => $request->price
             ]);
             
             return Response::json([
@@ -55,6 +62,13 @@ class GoodsController extends Controller
                     'success' => false,
                 ], 404);
             }
+
+            if($goods->price !== $request->price){
+                GoodLog::create([
+                    'good_id' => $goods->id,
+                    'price' => $request->price
+                ]);
+            }
             
             $goods->name = $request->name;
             $goods->description = $request->description;
@@ -63,6 +77,8 @@ class GoodsController extends Controller
             
             // Update other fields as needed
             $goods->save();
+
+            
 
             return Response::json([
                 'success' => true,
@@ -76,7 +92,11 @@ class GoodsController extends Controller
             ], 400);
         }
     }
-
+    public function log($id){
+        return Response::json([
+            'data' => GoodLog::select(DB::raw('DATE_FORMAT(created_at, "%Y-%m-%d") as date'), 'price as value')->where('good_id', $id)->orderBy('created_at', 'ASC')->get(),
+        ], 200);
+    }
     public function destroy($id)
     {
         try {

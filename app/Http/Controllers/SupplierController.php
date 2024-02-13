@@ -22,7 +22,7 @@ class SupplierController extends Controller
             $data =  ['data'=>Supplier::select('name', 'id')->get()];
             return response()->json($data);
         }
-        return Supplier::paginate(5);
+        return Supplier::where('name', 'like', '%'.$request->query('name').'%')->paginate(5);
     }
 
     public function show(Request $request, $id){

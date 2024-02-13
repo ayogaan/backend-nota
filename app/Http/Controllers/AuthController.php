@@ -13,6 +13,37 @@ class AuthController extends Controller
         $this->middleware('auth:api', ['except' => ['login','register']]);
     }
 
+    public function me(){
+        $user = auth()->user();
+        return response()->json([
+            'success'=> true,
+            'data'=> $user,
+            'message'=>"get logged in user"
+        ]);
+    }
+
+    public function changePassword(Request $request){
+        $request->validate([
+            'old_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
+
+        $user = Auth::user();
+
+        // Verify the old password
+        if (!Hash::check($request->old_password, $user->password)) {
+            return response()->json(['message' => 'Old password is incorrect'], 401);
+        }
+
+        // Update the password with the new hashed password
+        $user->update([
+            'password' => Hash::make($request->new_password),
+        ]);
+
+        return response()->json(['message' => 'Password changed successfully']);
+    
+    }
+
     public function login(Request $request)
     {
         $request->validate([

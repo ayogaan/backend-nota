@@ -29,8 +29,17 @@ class InstallmentTransactionController extends Controller
 
     public function store(Request $request)
     {
-       
+    
         try {
+            $installmentAmounts = InstallmentTransaction::where('note_id', $request->note_id)->sum('amount');
+            $transactionAmounts = Transaction::where('id_notes', $request->note_id)->sum('total_amount');
+            $transactionCuts = Transaction::where('id_notes', $request->note_id)->sum('total_cuts');
+            $maxAmount = $transactionAmounts - $installmentAmounts - $transactionCuts;
+            if($request->amount > $maxAmount){
+                return Response::json([
+                    'success' => false,
+                ], 400);
+            }
             $data = InstallmentTransaction::create([
                 'note_id' => $request->note_id,
                 'installment_number' => 1,
@@ -55,7 +64,7 @@ class InstallmentTransactionController extends Controller
             //calculate installment 
             
         } catch (\Exception $err) {
-            dd($err);
+        
             return Response::json([
                 'success' => false,
             ], 400);

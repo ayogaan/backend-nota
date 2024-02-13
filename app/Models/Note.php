@@ -13,7 +13,7 @@ class Note extends Model
     {
         return $this->hasMany(Transaction::class, 'id_notes')
         ->join('goods', 'transactions.id_good', '=', 'goods.id')
-        ->select('transactions.*', 'goods.name as good_name', 'goods.id_supplier');
+        ->select('transactions.*', 'goods.name as good_name','goods.name as name', 'goods.id_supplier');
     }
 
     public function installments()

@@ -13,12 +13,12 @@ class TransactionController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        // $this->middleware('auth');
     }
 
     public function index(Request $request)
     {
-        $transaction = Note::with('supplier')->selectRaw('SUM(transactions.total_amount) as total_amount, transactions.id_notes, project_id, notes.created_at, notes.is_pay_later, notes.id, notes.supplier_id')
+        $transaction = Note::with('supplier')->selectRaw('SUM(transactions.total_amount) as total_amount, SUM(transactions.total_cuts) as total_cuts, transactions.id_notes, project_id, notes.created_at, notes.is_pay_later, notes.id, notes.supplier_id')
         ->join('transactions', 'transactions.id_notes', '=', 'notes.id');
         if($request->query('id_project')){
             $transaction = $transaction->where('id_project',$request->query('id_project'));
@@ -51,26 +51,30 @@ class TransactionController extends Controller
 
             ]);
             $total = 0;
+            $total_cuts = 0;
             foreach($request->data as $d){
                 $data = Transaction::create([
                     'id_notes' => $note->id,
                     'id_good' => $d['id_good'],
                     'quantity' => $d['quantity'],
                     'total_amount' => $d['total_amount'],
+                    'total_cuts' => $d['quantity'] * $d['cuts'],
                     'id_project'=> $request->noteData['id_project'],
                     'created_at'=> $request->noteData['note_date']
 
                 ]);
                 $total += (int)$d['total_amount'];
+                $total_cuts += (float)$d['quantity'] * (float)$d['cuts'];
             }
            
             if($note->is_pay_later == 0){
-                //dd("asu");
+                
 
                 InstallmentTransaction::create([
                     'note_id' => $note->id,
                     'installment_number' => 1,
-                    'amount' => $total,
+                    'amount' => $total-$total_cuts,
+                    'created_at' => $request->noteData['note_date']
                 ]);
             }
                 return Response::json([
@@ -87,7 +91,7 @@ class TransactionController extends Controller
     }
 
     public function show($id){
-        return Note::selectRaw('SUM(transactions.total_amount) as total_amount, transactions.id_notes, project_id, notes.created_at, notes.is_pay_later, notes.id')
+        return Note::selectRaw('SUM(transactions.total_amount) as total_amount, SUM(transactions.total_cuts) as total_cuts, transactions.id_notes, project_id, notes.created_at, notes.is_pay_later, notes.id')
         ->join('transactions', 'transactions.id_notes', '=', 'notes.id')->where('notes.id', $id)->groupBy('notes.id')->with('transactions')->first();
     }
 
